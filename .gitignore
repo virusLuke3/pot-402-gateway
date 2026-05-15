@@ -1,0 +1,8 @@
+node_modules/
+.DS_Store
+.env
+.env.local
+data/*.json*
+!data/.gitkeep
+coverage/
+npm-debug.log*

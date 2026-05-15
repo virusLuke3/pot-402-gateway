@@ -1,0 +1,66 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>POT-402 Gateway — Portaldot Pay-per-Call API</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <main class="shell">
+    <section class="hero glass">
+      <div class="eyebrow">Portaldot Online Mini Hackathon S1 • Native Onchain Apps + Builder Tools</div>
+      <h1>POT-402 Gateway</h1>
+      <p class="lead">A Portaldot-native <strong>402 Payment Required</strong> gateway for pay-per-call APIs. Builders return a POT payment challenge, verify a receipt, and unlock premium resources.</p>
+      <div class="hero-actions">
+        <button id="call-api" class="primary">Call Protected API</button>
+        <button id="chain-status" class="secondary">Check Portaldot RPC</button>
+      </div>
+      <p class="safety">Safe mode: this demo does <strong>not</strong> broadcast Portaldot transactions. Real POT transfer mode requires explicit confirmation.</p>
+    </section>
+
+    <section class="grid">
+      <article class="card">
+        <h2>1. Payment Challenge</h2>
+        <p>Protected endpoints return structured HTTP 402 JSON with Portaldot network details and a suggested `balances.transferKeepAlive` payment.</p>
+        <pre id="challenge-output">Click “Call Protected API” to start.</pre>
+      </article>
+      <article class="card">
+        <h2>2. Receipt Verification</h2>
+        <p>For local judging, simulate a deterministic receipt. For final native proof, replace this with a confirmed Portaldot transfer hash.</p>
+        <button id="simulate-payment" disabled>Simulate Portaldot Payment</button>
+        <pre id="receipt-output">Waiting for challenge…</pre>
+      </article>
+      <article class="card">
+        <h2>3. Unlocked API</h2>
+        <p>After verification, the access token unlocks the paid endpoint and records proof in the gateway ledger.</p>
+        <button id="unlock-api" disabled>Unlock Premium Response</button>
+        <pre id="unlock-output">Waiting for receipt…</pre>
+      </article>
+      <article class="card">
+        <h2>Portaldot Native Proof</h2>
+        <ul>
+          <li>RPC: <code>wss://mainnet.portaldot.io</code></li>
+          <li>Token: <code>POT</code>, decimals <code>14</code></li>
+          <li>SS58 format: <code>42</code></li>
+          <li>Suggested extrinsic: <code>balances.transferKeepAlive</code></li>
+        </ul>
+        <pre id="chain-output">Click “Check Portaldot RPC”.</pre>
+      </article>
+    </section>
+
+    <section class="card full">
+      <h2>Why this can win</h2>
+      <div class="pill-row">
+        <span>Runnable MVP</span>
+        <span>Clear 2-minute demo</span>
+        <span>Real Portaldot integration path</span>
+        <span>POT-centered payment primitive</span>
+        <span>Builder tool + user-facing app</span>
+      </div>
+      <p>This is not an EVM port. It uses Portaldot’s Substrate-native payment model and demonstrates an ecosystem primitive that other builders can reuse.</p>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

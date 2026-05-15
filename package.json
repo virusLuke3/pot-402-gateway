@@ -1,0 +1,27 @@
+{
+  "name": "pot-402-gateway",
+  "version": "0.1.0",
+  "description": "Portaldot-native HTTP 402 pay-per-call API gateway demo for Portaldot Online Mini Hackathon S1.",
+  "private": true,
+  "type": "commonjs",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "POT402_PORT=4020 node src/server.js",
+    "test": "node --test test/*.test.js",
+    "smoke": "node scripts/smoke.js",
+    "verify": "npm test && npm run smoke"
+  },
+  "keywords": [
+    "portaldot",
+    "pot",
+    "substrate",
+    "http-402",
+    "hackathon",
+    "api-gateway"
+  ],
+  "author": "virusLuke3 + Hermes Agent",
+  "license": "MIT"
+}

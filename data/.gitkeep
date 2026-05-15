@@ -1,0 +1,1 @@
+# Keep data directory in git. Runtime ledger JSON files are ignored.

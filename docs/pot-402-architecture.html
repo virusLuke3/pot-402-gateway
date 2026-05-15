@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>POT-402 Gateway architecture</title>
+  <style>
+    body{margin:0;background:#020617;color:#e2e8f0;font-family:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,monospace}.wrap{max-width:1160px;margin:0 auto;padding:36px 20px}.top{display:flex;align-items:center;gap:12px;margin-bottom:18px}.dot{width:12px;height:12px;border-radius:50%;background:#7cf7d4;box-shadow:0 0 24px #7cf7d4}h1{font-size:30px;margin:0}p{color:#94a3b8;line-height:1.55}.card{border:1px solid #1e293b;border-radius:18px;background:#0f172a;padding:18px;box-shadow:0 24px 80px rgba(0,0,0,.35)}svg{width:100%;height:auto;display:block}.box-title{font-size:13px;fill:#e2e8f0;font-weight:700}.box-sub{font-size:9px;fill:#94a3b8}.label{font-size:9px;fill:#cbd5e1}.summary{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-top:16px}.mini{border:1px solid #1e293b;border-radius:14px;background:#0b1220;padding:14px}.mini h3{font-size:14px;margin:0 0 8px}.mini ul{margin:0;padding-left:18px;color:#94a3b8;font-size:12px;line-height:1.6}@media(max-width:800px){.summary{grid-template-columns:1fr}}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <div class="top"><div class="dot"></div><h1>POT-402 Gateway architecture</h1></div>
+    <p>A safe-mode Portaldot payment gateway demo. It shows the complete HTTP 402 → payment challenge → receipt → unlock loop without broadcasting transactions.</p>
+    <div class="card">
+      <svg viewBox="0 0 1120 620" role="img" aria-label="POT-402 Gateway architecture diagram">
+        <defs>
+          <pattern id="grid" width="40" height="40" patternUnits="userSpaceOnUse"><path d="M 40 0 L 0 0 0 40" fill="none" stroke="#1e293b" stroke-width="0.5"/></pattern>
+          <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#38bdf8"/></marker>
+          <marker id="arrowGreen" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#34d399"/></marker>
+          <marker id="arrowRose" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M 0 0 L 10 5 L 0 10 z" fill="#fb7185"/></marker>
+        </defs>
+        <rect width="1120" height="620" fill="url(#grid)"/>
+        <path d="M 210 150 C 300 150, 315 150, 400 150" stroke="#38bdf8" stroke-width="2" fill="none" marker-end="url(#arrow)"/>
+        <path d="M 720 150 C 810 150, 835 150, 930 150" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+        <path d="M 560 210 C 560 265, 560 300, 560 355" stroke="#34d399" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+        <path d="M 720 400 C 810 400, 835 400, 930 400" stroke="#a78bfa" stroke-width="2" fill="none" marker-end="url(#arrowGreen)"/>
+        <path d="M 560 500 C 560 535, 560 548, 560 575" stroke="#fb7185" stroke-width="2" stroke-dasharray="6 5" fill="none" marker-end="url(#arrowRose)"/>
+
+        <rect x="40" y="95" width="170" height="110" rx="8" fill="#0f172a"/><rect x="40" y="95" width="170" height="110" rx="8" fill="rgba(8,51,68,.4)" stroke="#22d3ee" stroke-width="1.5"/>
+        <text x="65" y="132" class="box-title">Demo Web UI</text><text x="65" y="154" class="box-sub">Call API, inspect 402, unlock</text><text x="65" y="174" class="box-sub">No private keys in app</text>
+
+        <rect x="400" y="70" width="320" height="160" rx="8" fill="#0f172a"/><rect x="400" y="70" width="320" height="160" rx="8" fill="rgba(6,78,59,.4)" stroke="#34d399" stroke-width="1.5"/>
+        <text x="430" y="112" class="box-title">POT-402 Gateway API</text><text x="430" y="136" class="box-sub">GET /api/protected/weather → 402</text><text x="430" y="156" class="box-sub">POST /api/receipts/simulate → receipt</text><text x="430" y="176" class="box-sub">GET /api/chain/status → read-only RPC</text><text x="430" y="196" class="box-sub">Node.js, no external npm deps</text>
+
+        <rect x="930" y="95" width="160" height="110" rx="8" fill="#0f172a"/><rect x="930" y="95" width="160" height="110" rx="8" fill="rgba(30,41,59,.5)" stroke="#94a3b8" stroke-width="1.5"/>
+        <text x="960" y="132" class="box-title">Protected API</text><text x="960" y="154" class="box-sub">Premium payload</text><text x="960" y="174" class="box-sub">Unlocked by token</text>
+
+        <rect x="400" y="355" width="320" height="110" rx="8" fill="#0f172a"/><rect x="400" y="355" width="320" height="110" rx="8" fill="rgba(76,29,149,.4)" stroke="#a78bfa" stroke-width="1.5"/>
+        <text x="430" y="393" class="box-title">Receipt Ledger</text><text x="430" y="416" class="box-sub">Challenges, receipts, access tokens</text><text x="430" y="436" class="box-sub">Public ledger route redacts tokens</text>
+
+        <rect x="930" y="345" width="160" height="120" rx="8" fill="#0f172a"/><rect x="930" y="345" width="160" height="120" rx="8" fill="rgba(120,53,15,.3)" stroke="#fbbf24" stroke-width="1.5"/>
+        <text x="962" y="382" class="box-title">Portaldot</text><text x="962" y="405" class="box-sub">wss://mainnet.portaldot.io</text><text x="962" y="425" class="box-sub">POT, decimals 14</text><text x="962" y="445" class="box-sub">balances.transferKeepAlive</text>
+
+        <rect x="400" y="535" width="320" height="60" rx="8" fill="#0f172a"/><rect x="400" y="535" width="320" height="60" rx="8" fill="rgba(136,19,55,.4)" stroke="#fb7185" stroke-width="1.5"/>
+        <text x="430" y="570" class="box-title">Real tx boundary: approval required</text>
+
+        <text x="250" y="135" class="label">1. request protected resource</text><text x="760" y="135" class="label">4. unlock after receipt</text><text x="575" y="295" class="label">2. store challenge / receipt</text><text x="755" y="386" class="label">3. read-only chain status</text><text x="580" y="520" class="label">real wallet payment is not automatic</text>
+      </svg>
+    </div>
+    <div class="summary">
+      <div class="mini"><h3>Demo proof</h3><ul><li>HTTP 402 challenge</li><li>Receipt verification</li><li>Paid API unlock</li></ul></div>
+      <div class="mini"><h3>Portaldot proof</h3><ul><li>POT token/decimals</li><li>SS58 42</li><li>Read-only RPC status</li></ul></div>
+      <div class="mini"><h3>Safety</h3><ul><li>No private keys</li><li>No tx broadcast</li><li>Real tx needs approval</li></ul></div>
+    </div>
+  </div>
+</body>
+</html>

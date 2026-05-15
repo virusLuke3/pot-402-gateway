@@ -14,54 +14,35 @@ async function main() {
   const { port } = server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
   try {
-    const challengeResponse = await fetch(`${baseUrl}/api/protected/weather`);
-    if (challengeResponse.status !== 402) {
-      throw new Error(`Expected protected API to return 402, got ${challengeResponse.status}`);
-    }
-    const challengeBody = await challengeResponse.json();
-    const challengeId = challengeBody.challenge.id;
-
-    const previewResponse = await fetch(`${baseUrl}/api/receipts/local-dev/preview`, {
+    const demoResponse = await fetch(`${baseUrl}/api/demo/local-dev`, {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ challengeId, payer: 'Alice' }),
+      body: JSON.stringify({ productId: 'weather', payer: 'Alice' }),
     });
-    if (previewResponse.status !== 200) {
-      throw new Error(`Expected local preview 200, got ${previewResponse.status}: ${await previewResponse.text()}`);
+    const demoBody = await demoResponse.json();
+    if (demoResponse.status !== 201) {
+      throw new Error(`Expected one-click local demo 201, got ${demoResponse.status}: ${JSON.stringify(demoBody)}`);
     }
-
-    const receiptResponse = await fetch(`${baseUrl}/api/receipts/local-dev`, {
-      method: 'POST',
-      headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ challengeId, payer: 'Alice' }),
-    });
-    const receiptBody = await receiptResponse.json();
-    if (receiptResponse.status !== 201) {
-      throw new Error(`Expected local receipt 201, got ${receiptResponse.status}: ${JSON.stringify(receiptBody)}`);
+    if (!demoBody.ok || demoBody.receipt.verification.status !== 'verified_local_dev_chain') {
+      throw new Error(`Unexpected local demo payload: ${JSON.stringify(demoBody)}`);
     }
-
-    const token = receiptBody.accessToken.token;
-    const unlockedResponse = await fetch(`${baseUrl}/api/protected/weather`, {
-      headers: { authorization: `Bearer ${token}` },
-    });
-    if (unlockedResponse.status !== 200) {
-      throw new Error(`Expected unlock 200, got ${unlockedResponse.status}: ${await unlockedResponse.text()}`);
-    }
-    const unlockedBody = await unlockedResponse.json();
-    if (!unlockedBody.ok || unlockedBody.receipt.verification.status !== 'verified_local_dev_chain') {
-      throw new Error(`Unexpected unlock payload: ${JSON.stringify(unlockedBody)}`);
+    if (!demoBody.unlock.ok || !demoBody.unlock.data.unlocked) {
+      throw new Error(`Expected unlocked premium payload, got: ${JSON.stringify(demoBody.unlock)}`);
     }
 
     console.log(JSON.stringify({
       ok: true,
       message: 'LOCAL_DEV_SMOKE_OK',
       baseUrl,
-      txHash: receiptBody.receipt.txHash,
-      blockHash: receiptBody.receipt.blockHash,
-      payer: receiptBody.receipt.payer,
-      recipient: receiptBody.receipt.recipient,
-      amountPlanck: receiptBody.receipt.amountPlanck,
-      verification: receiptBody.receipt.verification.status,
+      mode: demoBody.mode,
+      demoSteps: demoBody.demoSteps,
+      txHash: demoBody.receipt.txHash,
+      blockHash: demoBody.receipt.blockHash,
+      payer: demoBody.receipt.payer,
+      recipient: demoBody.receipt.recipient,
+      amountPlanck: demoBody.receipt.amountPlanck,
+      verification: demoBody.receipt.verification.status,
+      unlockedProduct: demoBody.unlock.data.product,
     }, null, 2));
   } finally {
     await new Promise((resolve) => server.close(resolve));

@@ -56,6 +56,22 @@ http://localhost:4020
 
 ## Demo steps
 
+### One-click path
+
+1. Click **Run Full Local Dev Demo**.
+2. Confirm the challenge panel shows the generated 402 challenge.
+3. Confirm the receipt panel shows:
+   - `mode: local-dev-chain`
+   - `verification.status: verified_local_dev_chain`
+   - tx hash
+   - block hash
+   - payer `Alice`
+   - recipient
+   - amount
+4. Confirm the unlock panel shows the paid API response.
+
+### Step-by-step path
+
 1. Click **Call Protected API**.
 2. Confirm the challenge includes:
    - token: `POT`
@@ -95,6 +111,14 @@ Preview local transfer:
 curl -s -X POST http://localhost:4020/api/receipts/local-dev/preview \
   -H 'content-type: application/json' \
   -d '{"challengeId":"<challenge-id>","payer":"Alice"}'
+```
+
+One-click local demo:
+
+```bash
+curl -s -X POST http://localhost:4020/api/demo/local-dev \
+  -H 'content-type: application/json' \
+  -d '{"productId":"weather","payer":"Alice"}'
 ```
 
 Submit local transfer:

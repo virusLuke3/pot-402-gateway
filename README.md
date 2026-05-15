@@ -90,6 +90,13 @@ POT402_MODE=local-dev POT402_LOCAL_RPC=ws://127.0.0.1:9944 npm start
 
 Local-dev flow:
 
+**One-click demo path:**
+
+1. Click **Run Full Local Dev Demo**.
+2. Show the generated 402 challenge, localhost-only transfer preview, verified local receipt, and unlocked premium API payload.
+
+**Step-by-step demo path:**
+
 1. Click **Call Protected API**.
 2. Click **Preview Local Dev Transfer** to show the exact `balances.transferKeepAlive(dest, value)` call.
 3. Click **Submit Local Dev Transfer** to send a real transfer from `//Alice` to the gateway recipient on `ws://127.0.0.1:9944`.
@@ -123,6 +130,7 @@ This proves real Substrate/Portaldot transaction mechanics without mainnet funds
 | `/api/receipts/simulate` | POST | Create safe mock receipt for a challenge |
 | `/api/receipts/local-dev/preview` | POST | Preview localhost-only `balances.transferKeepAlive` payment for a challenge |
 | `/api/receipts/local-dev` | POST | Submit localhost-only local dev transfer and create verified local receipt |
+| `/api/demo/local-dev` | POST | Run the full one-click local dev challenge → transfer → unlock demo |
 | `/api/ledger` | GET | Local receipt/access ledger |
 
 ## Architecture

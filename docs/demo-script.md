@@ -6,14 +6,11 @@ Portaldot builders need a simple way to charge for API calls, datasets, tools, o
 **0:20 — Solution**
 POT-402 Gateway turns a protected API into a Portaldot payment challenge. Instead of a subscription system, the API itself says: `402 Payment Required`.
 
-**0:40 — Live demo: challenge**
-Click “Call Protected API”. The gateway returns a structured 402 challenge with Portaldot token metadata, recipient, amount, and a suggested `balances.transferKeepAlive` call.
+**0:40 — Live demo: one-click local proof**
+Click “Run Full Local Dev Demo”. The app creates a structured 402 challenge, previews the native `balances.transferKeepAlive` call, submits it to the local Portaldot dev node, verifies the receipt, and unlocks the paid API.
 
-**1:00 — Local Portaldot proof**
-With `portaldot_dev --dev --alice` running, click “Preview Local Dev Transfer”. The app shows the exact localhost-only transfer: Alice pays the gateway recipient using native POT units on `ws://127.0.0.1:9944`.
-
-**1:15 — Submit local transfer**
-Click “Submit Local Dev Transfer”. The gateway signs with the public Substrate dev account `//Alice`, submits `balances.transferKeepAlive`, and records the local tx hash, block hash, events, payer, recipient, and amount. No mainnet funds are touched.
+**1:10 — Payment proof**
+Show the local receipt: `verified_local_dev_chain`, tx hash, block hash, payer Alice, gateway recipient, amount in planck, and safety note that no mainnet funds were touched.
 
 **1:35 — Unlock**
 Click “Unlock Premium Response”. The paid API now returns premium data and a proof ledger entry with `verified_local_dev_chain` status.

@@ -16,6 +16,7 @@ Current API proof points:
 - `/api/receipts/simulate` returns a mock receipt and access token.
 - `/api/receipts/local-dev/preview` prepares a localhost-only `balances.transferKeepAlive` proof.
 - `/api/receipts/local-dev` submits a transfer to `ws://127.0.0.1:9944` when a Portaldot local dev node is running.
+- `/api/demo/local-dev` runs the full local dev challenge → transfer → unlock proof in one call for demo reliability.
 - `/api/protected/weather?accessToken=...` returns a paid payload.
 - `/api/ledger` redacts access tokens.
 - `/api/chain/status` performs read-only Portaldot RPC checks.

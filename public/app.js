@@ -61,6 +61,38 @@ async function submitLocalDevPayment() {
   $('unlock-api').disabled = !currentAccessToken;
 }
 
+async function runFullLocalDevDemo() {
+  $('challenge-output').textContent = 'Creating challenge and running full local-dev proof…';
+  $('receipt-output').textContent = 'Submitting one-click local dev demo to ws://127.0.0.1:9944…';
+  $('unlock-output').textContent = 'Waiting for verified local receipt…';
+  const res = await fetch('/api/demo/local-dev', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ productId: 'weather', payer: 'Alice' }),
+  });
+  const body = await res.json();
+  if (!res.ok) {
+    $('challenge-output').textContent = 'One-click demo did not create a challenge.';
+    $('receipt-output').textContent = `HTTP ${res.status}\n\n${pretty(body)}`;
+    $('unlock-output').textContent = 'Fix the local-dev node or input, then try again.';
+    return;
+  }
+  currentChallenge = body.challenge;
+  currentReceipt = body.receipt;
+  currentAccessToken = body.accessToken?.token;
+  $('challenge-output').textContent = `HTTP 402 equivalent challenge\n\n${pretty(body.challenge)}`;
+  $('receipt-output').textContent = `HTTP ${res.status}\n\n${pretty({
+    mode: body.mode,
+    demoSteps: body.demoSteps,
+    preview: body.preview,
+    receipt: body.receipt,
+    safety: body.safety,
+  })}`;
+  $('unlock-output').textContent = pretty(body.unlock);
+  setReceiptButtons(Boolean(currentChallenge));
+  $('unlock-api').disabled = !currentAccessToken;
+}
+
 async function unlockApi() {
   if (!currentAccessToken) return;
   const res = await fetch('/api/protected/weather?accessToken=' + encodeURIComponent(currentAccessToken));
@@ -79,5 +111,6 @@ $('call-api').addEventListener('click', callProtectedApi);
 $('simulate-payment').addEventListener('click', simulatePayment);
 $('preview-local-payment').addEventListener('click', previewLocalDevPayment);
 $('local-dev-payment').addEventListener('click', submitLocalDevPayment);
+$('run-local-demo').addEventListener('click', runFullLocalDevDemo);
 $('unlock-api').addEventListener('click', unlockApi);
 $('chain-status').addEventListener('click', checkChainStatus);

@@ -14,6 +14,7 @@
     "test": "node --test test/*.test.js",
     "smoke": "node scripts/smoke.js",
     "smoke:local-dev": "node scripts/local-dev-smoke.js",
+    "ci": "npm run verify",
     "verify": "npm test && npm run smoke"
   },
   "keywords": [

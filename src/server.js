@@ -6,6 +6,7 @@ const { readLedger, resetLedger } = require('./ledger');
 const { chainConfig, getChainStatus } = require('./chain');
 const { createChallenge, getProduct, premiumPayload, simulateReceipt, verifyAccess } = require('./payment');
 const { buildLocalDevPaymentPreview, executeLocalDevPayment } = require('./local-dev-payment');
+const { runLocalDevDemo } = require('./demo-flow');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -76,7 +77,7 @@ function paymentRequired(res, challenge) {
   });
 }
 
-async function route(req, res) {
+async function route(req, res, deps = {}) {
   const url = new URL(req.url, `http://${req.headers.host || 'localhost'}`);
   const pathname = url.pathname;
 
@@ -131,11 +132,26 @@ async function route(req, res) {
 
   if (req.method === 'POST' && pathname === '/api/receipts/local-dev') {
     const body = await parseBody(req);
-    const result = await executeLocalDevPayment({ challengeId: body.challengeId, payer: body.payer || 'Alice' });
+    const result = await executeLocalDevPayment(
+      { challengeId: body.challengeId, payer: body.payer || 'Alice' },
+      config.ledgerPath,
+      deps.localDevClientFactory,
+    );
     sendJson(res, 201, {
       ...result,
       safety: 'Submitted only to the localhost Portaldot development node. This endpoint refuses public RPC targets and never uses mainnet funds.',
     });
+    return;
+  }
+
+  if (req.method === 'POST' && pathname === '/api/demo/local-dev') {
+    const body = await parseBody(req);
+    const result = await runLocalDevDemo(
+      { productId: body.productId || 'weather', payer: body.payer || 'Alice' },
+      config.ledgerPath,
+      deps.localDevClientFactory,
+    );
+    sendJson(res, 201, result);
     return;
   }
 
@@ -181,9 +197,9 @@ async function route(req, res) {
   sendJson(res, 404, { error: 'not_found', pathname });
 }
 
-function createApp() {
+function createApp(appOptions = {}) {
   return http.createServer((req, res) => {
-    route(req, res).catch((error) => {
+    route(req, res, appOptions).catch((error) => {
       const statusCode = error.statusCode || 500;
       sendJson(res, statusCode, {
         error: statusCode === 503 ? 'service_unavailable' : (statusCode >= 500 ? 'internal_error' : 'bad_request'),

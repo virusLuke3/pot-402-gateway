@@ -11,8 +11,8 @@ process.env.POT402_MODE = 'mock';
 
 const { createApp } = require('../src/server');
 
-async function withServer(fn) {
-  const server = createApp();
+async function withServer(fn, appOptions = {}) {
+  const server = createApp(appOptions);
   await new Promise((resolve) => server.listen(0, resolve));
   const { port } = server.address();
   const baseUrl = `http://127.0.0.1:${port}`;
@@ -120,4 +120,50 @@ test('local dev preview endpoint prepares localhost-only transfer proof', async 
     assert.equal(preview.extrinsic.params.dest, challengeResponse.challenge.recipient);
     assert.equal(preview.extrinsic.params.value, challengeResponse.challenge.amountPlanck);
   });
+});
+
+test('one-click local dev demo endpoint runs full payment and unlock flow with injected client', async () => {
+  const fakeClientFactory = async () => ({
+    async transferKeepAlive({ payerUri, recipient, amountPlanck }) {
+      assert.equal(payerUri, '//Alice');
+      return {
+        txHash: '0x' + 'c'.repeat(64),
+        blockHash: '0x' + 'd'.repeat(64),
+        blockNumber: 7,
+        payerAddress: '5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY',
+        feePlanck: '1000',
+        events: [{ section: 'balances', method: 'Transfer', data: ['Alice', recipient, amountPlanck] }],
+      };
+    },
+    async disconnect() {},
+  });
+
+  await withServer(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/demo/local-dev`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ productId: 'weather', payer: 'Alice' }),
+    });
+    assert.equal(response.status, 201);
+    const body = await response.json();
+    assert.equal(body.ok, true);
+    assert.equal(body.mode, 'local-dev-chain');
+    assert.equal(body.receipt.verification.status, 'verified_local_dev_chain');
+    assert.equal(body.unlock.data.unlocked, true);
+    assert.equal(body.demoSteps.includes('Protected API payload unlocked'), true);
+  }, { localDevClientFactory: fakeClientFactory });
+});
+
+test('one-click local dev demo endpoint rejects non-Alice payer', async () => {
+  await withServer(async (baseUrl) => {
+    const response = await fetch(`${baseUrl}/api/demo/local-dev`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ productId: 'weather', payer: 'Bob' }),
+    });
+    assert.equal(response.status, 400);
+    const body = await response.json();
+    assert.equal(body.error, 'bad_request');
+    assert.match(body.message, /Alice/);
+  }, { localDevClientFactory: async () => { throw new Error('should not create client'); } });
 });

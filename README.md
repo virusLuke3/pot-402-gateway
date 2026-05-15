@@ -12,7 +12,7 @@ POT-402 Gateway demonstrates a small but reusable pattern:
 
 1. A protected API returns `402 Payment Required`.
 2. The response includes a Portaldot/POT payment challenge.
-3. The user pays POT or, in safe local mode, simulates a receipt.
+3. The user pays POT on a local Portaldot dev node or, in safe mock mode, simulates a receipt.
 4. The gateway verifies the receipt and unlocks the API response.
 
 ## Hackathon fit
@@ -26,7 +26,8 @@ POT-402 Gateway demonstrates a small but reusable pattern:
 
 ## Portaldot facts used
 
-- RPC: `wss://mainnet.portaldot.io`
+- Mainnet read-only RPC: `wss://mainnet.portaldot.io`
+- Local dev RPC: `ws://127.0.0.1:9944` after running `portaldot_dev --dev --alice`
 - SS58 format: `42`
 - Token: `POT`
 - Decimals: `14`
@@ -40,20 +41,30 @@ Sources:
 
 ## Safety boundary
 
-This MVP starts in **safe mock mode**:
+This MVP is **safe by default**:
 
-- It does **not** request private keys.
-- It does **not** broadcast Portaldot transactions.
-- It does **not** claim mock receipts are real on-chain transactions.
+- Mock mode does **not** request private keys.
+- Mock mode does **not** broadcast Portaldot transactions.
+- Mock mode does **not** claim mock receipts are real on-chain transactions.
+- Local-dev mode only submits transactions to `ws://127.0.0.1:9944`, and only with well-known public Substrate development accounts such as `//Alice`.
+- Local-dev mode refuses public RPC endpoints, so it cannot accidentally target mainnet.
 
-Real mode should replace the simulation step with an approved Polkadot.js / Portaldot wallet transaction using `balances.transferKeepAlive`. Any real transaction, public deployment, public GitHub publishing, or final submission requires explicit user confirmation.
+Public testnet/mainnet mode should replace local-dev payment with an approved Polkadot.js / Portaldot wallet transaction using `balances.transferKeepAlive`. Any public-chain transaction, public deployment, or final submission requires explicit user confirmation.
 
 ## Run locally
 
 ```bash
+npm install
 npm test
 npm run smoke
 npm start
+```
+
+For local-dev mode after the node is running:
+
+```bash
+npm run dev:local
+npm run smoke:local-dev
 ```
 
 Open:
@@ -62,7 +73,34 @@ Open:
 http://localhost:4020
 ```
 
+## Local dev chain demo
+
+The stronger judge demo uses the official Portaldot local development network:
+
+```bash
+# from the downloaded portaldot-testnet-macos or portaldot-testnet-ubuntu directory
+./portaldot_dev --dev --alice
+```
+
+Then keep the node running and start the gateway:
+
+```bash
+POT402_MODE=local-dev POT402_LOCAL_RPC=ws://127.0.0.1:9944 npm start
+```
+
+Local-dev flow:
+
+1. Click **Call Protected API**.
+2. Click **Preview Local Dev Transfer** to show the exact `balances.transferKeepAlive(dest, value)` call.
+3. Click **Submit Local Dev Transfer** to send a real transfer from `//Alice` to the gateway recipient on `ws://127.0.0.1:9944`.
+4. Click **Unlock Premium Response**.
+5. Show the receipt ledger with local tx hash, block hash, events, amount, payer, recipient, and access token redaction.
+
+This proves real Substrate/Portaldot transaction mechanics without mainnet funds.
+
 ## Demo flow
+
+### Mock flow
 
 1. Click **Call Protected API**.
 2. Observe `HTTP 402` with a Portaldot/POT payment challenge.
@@ -83,6 +121,8 @@ http://localhost:4020
 | `/api/protected/weather` | GET | Protected API, returns 402 until access token is provided. Local demo supports `?accessToken=...`; public deployments should prefer `Authorization: Bearer <token>` to avoid logging tokens in URLs. |
 | `/api/protected/builder_alpha` | GET | Second protected product |
 | `/api/receipts/simulate` | POST | Create safe mock receipt for a challenge |
+| `/api/receipts/local-dev/preview` | POST | Preview localhost-only `balances.transferKeepAlive` payment for a challenge |
+| `/api/receipts/local-dev` | POST | Submit localhost-only local dev transfer and create verified local receipt |
 | `/api/ledger` | GET | Local receipt/access ledger |
 
 ## Architecture

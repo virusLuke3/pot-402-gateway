@@ -5,6 +5,7 @@ const { config } = require('./config');
 const { readLedger, resetLedger } = require('./ledger');
 const { chainConfig, getChainStatus } = require('./chain');
 const { createChallenge, getProduct, premiumPayload, simulateReceipt, verifyAccess } = require('./payment');
+const { buildLocalDevPaymentPreview, executeLocalDevPayment } = require('./local-dev-payment');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -116,6 +117,28 @@ async function route(req, res) {
     return;
   }
 
+  if (req.method === 'POST' && pathname === '/api/receipts/local-dev/preview') {
+    const body = await parseBody(req);
+    const ledger = readLedger(config.ledgerPath);
+    const challenge = ledger.challenges.find((item) => item.id === body.challengeId);
+    if (!challenge) {
+      sendJson(res, 404, { error: 'unknown_challenge_id' });
+      return;
+    }
+    sendJson(res, 200, buildLocalDevPaymentPreview(challenge, { payer: body.payer || 'Alice' }));
+    return;
+  }
+
+  if (req.method === 'POST' && pathname === '/api/receipts/local-dev') {
+    const body = await parseBody(req);
+    const result = await executeLocalDevPayment({ challengeId: body.challengeId, payer: body.payer || 'Alice' });
+    sendJson(res, 201, {
+      ...result,
+      safety: 'Submitted only to the localhost Portaldot development node. This endpoint refuses public RPC targets and never uses mainnet funds.',
+    });
+    return;
+  }
+
   if (req.method === 'GET' && pathname === '/api/ledger') {
     const ledger = readLedger(config.ledgerPath);
     sendJson(res, 200, {
@@ -163,7 +186,7 @@ function createApp() {
     route(req, res).catch((error) => {
       const statusCode = error.statusCode || 500;
       sendJson(res, statusCode, {
-        error: statusCode >= 500 ? 'internal_error' : 'bad_request',
+        error: statusCode === 503 ? 'service_unavailable' : (statusCode >= 500 ? 'internal_error' : 'bad_request'),
         message: error.message,
       });
     });

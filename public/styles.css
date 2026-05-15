@@ -36,7 +36,8 @@ body {
 h1 { font-size: clamp(44px, 7vw, 86px); margin: 12px 0; line-height: .92; }
 h2 { margin: 0 0 12px; }
 .lead { font-size: 20px; color: var(--muted); max-width: 820px; line-height: 1.65; }
-.hero-actions { display: flex; flex-wrap: wrap; gap: 14px; margin: 28px 0 14px; }
+.hero-actions, .button-row { display: flex; flex-wrap: wrap; gap: 14px; margin: 28px 0 14px; }
+.button-row { margin: 14px 0; gap: 10px; }
 button {
   border: 0;
   border-radius: 999px;

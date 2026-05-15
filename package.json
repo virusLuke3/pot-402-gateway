@@ -10,8 +10,10 @@
   "scripts": {
     "start": "node src/server.js",
     "dev": "POT402_PORT=4020 node src/server.js",
+    "dev:local": "POT402_MODE=local-dev POT402_LOCAL_RPC=ws://127.0.0.1:9944 POT402_PORT=4020 node src/server.js",
     "test": "node --test test/*.test.js",
     "smoke": "node scripts/smoke.js",
+    "smoke:local-dev": "node scripts/local-dev-smoke.js",
     "verify": "npm test && npm run smoke"
   },
   "keywords": [
@@ -23,5 +25,10 @@
     "api-gateway"
   ],
   "author": "virusLuke3 + Hermes Agent",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "@polkadot/api": "^16.5.6",
+    "@polkadot/keyring": "^14.0.3",
+    "@polkadot/util-crypto": "^14.0.3"
+  }
 }

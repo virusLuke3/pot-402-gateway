@@ -16,7 +16,7 @@
         <button id="call-api" class="primary">Call Protected API</button>
         <button id="chain-status" class="secondary">Check Portaldot RPC</button>
       </div>
-      <p class="safety">Safe mode: this demo does <strong>not</strong> broadcast Portaldot transactions. Real POT transfer mode requires explicit confirmation.</p>
+      <p class="safety">Safe by default: mock mode does not broadcast. Local-dev mode only broadcasts to <code>ws://127.0.0.1:9944</code> after you start <code>portaldot_dev --dev --alice</code>; it never targets mainnet.</p>
     </section>
 
     <section class="grid">
@@ -27,8 +27,12 @@
       </article>
       <article class="card">
         <h2>2. Receipt Verification</h2>
-        <p>For local judging, simulate a deterministic receipt. For final native proof, replace this with a confirmed Portaldot transfer hash.</p>
-        <button id="simulate-payment" disabled>Simulate Portaldot Payment</button>
+        <p>Mock mode proves the API flow. Local-dev mode submits a real <code>balances.transferKeepAlive</code> extrinsic to your local Portaldot dev node using Alice's public dev account.</p>
+        <div class="button-row">
+          <button id="simulate-payment" disabled>Simulate Portaldot Payment</button>
+          <button id="preview-local-payment" class="secondary" disabled>Preview Local Dev Transfer</button>
+          <button id="local-dev-payment" class="secondary" disabled>Submit Local Dev Transfer</button>
+        </div>
         <pre id="receipt-output">Waiting for challenge…</pre>
       </article>
       <article class="card">
@@ -40,7 +44,8 @@
       <article class="card">
         <h2>Portaldot Native Proof</h2>
         <ul>
-          <li>RPC: <code>wss://mainnet.portaldot.io</code></li>
+          <li>Mainnet read-only RPC: <code>wss://mainnet.portaldot.io</code></li>
+          <li>Local dev RPC: <code>ws://127.0.0.1:9944</code></li>
           <li>Token: <code>POT</code>, decimals <code>14</code></li>
           <li>SS58 format: <code>42</code></li>
           <li>Suggested extrinsic: <code>balances.transferKeepAlive</code></li>

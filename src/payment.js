@@ -88,6 +88,19 @@ function isExpired(challenge) {
   return new Date(challenge.expiresAt).getTime() < Date.now();
 }
 
+function createAccessTokenForReceipt(receipt, challenge) {
+  return {
+    id: randomId('access'),
+    token: crypto.createHash('sha256').update(`${receipt.id}:${receipt.txHash}`).digest('hex'),
+    receiptId: receipt.id,
+    challengeId: challenge.id,
+    productId: challenge.productId,
+    endpoint: challenge.endpoint,
+    issuedAt: nowIso(),
+    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
+  };
+}
+
 function simulateReceipt({ challengeId, payer = 'demo-payer' }, ledgerPath = config.ledgerPath) {
   const ledger = readLedger(ledgerPath);
   const challenge = findChallenge(challengeId, ledger);
@@ -120,16 +133,7 @@ function simulateReceipt({ challengeId, payer = 'demo-payer' }, ledgerPath = con
       note: 'This is a deterministic safe-mode receipt. Do not present it as a real on-chain transaction.',
     },
   };
-  const accessToken = {
-    id: randomId('access'),
-    token: crypto.createHash('sha256').update(`${receipt.id}:${receipt.txHash}`).digest('hex'),
-    receiptId: receipt.id,
-    challengeId: challenge.id,
-    productId: challenge.productId,
-    endpoint: challenge.endpoint,
-    issuedAt: nowIso(),
-    expiresAt: new Date(Date.now() + 60 * 60 * 1000).toISOString(),
-  };
+  const accessToken = createAccessTokenForReceipt(receipt, challenge);
   challenge.status = 'paid_mock';
   ledger.receipts.push(receipt);
   ledger.accessTokens.push(accessToken);
@@ -176,4 +180,7 @@ module.exports = {
   verifyAccess,
   premiumPayload,
   fakeTxHash,
+  findChallenge,
+  isExpired,
+  createAccessTokenForReceipt,
 };

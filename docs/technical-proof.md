@@ -14,11 +14,25 @@ Current API proof points:
 
 - `/api/protected/weather` returns `402` without access.
 - `/api/receipts/simulate` returns a mock receipt and access token.
+- `/api/receipts/local-dev/preview` prepares a localhost-only `balances.transferKeepAlive` proof.
+- `/api/receipts/local-dev` submits a transfer to `ws://127.0.0.1:9944` when a Portaldot local dev node is running.
 - `/api/protected/weather?accessToken=...` returns a paid payload.
 - `/api/ledger` redacts access tokens.
 - `/api/chain/status` performs read-only Portaldot RPC checks.
 
-## Real transaction path
+## Local dev transaction path
+
+The local-dev mode implements the same proof shape against the official Portaldot local development network:
+
+1. Start `portaldot_dev --dev --alice`.
+2. Keep RPC available at `ws://127.0.0.1:9944`.
+3. Use `//Alice`, a well-known public Substrate development account, to sign `balances.transferKeepAlive`.
+4. Store the local tx hash, block hash, events, amount, payer, and recipient.
+5. Mark the receipt as `verified_local_dev_chain` and unlock the API.
+
+This is stronger than a mock because it exercises real Substrate transaction mechanics, while still avoiding mainnet funds.
+
+## Public-chain transaction path
 
 The payment challenge includes:
 
@@ -43,4 +57,4 @@ A production or final-demo version should:
 
 ## Current limitation
 
-Portaldot transaction broadcasting is intentionally disabled in the current safe MVP. This avoids private-key handling and prevents accidental mainnet/testnet transactions.
+The gateway can now submit localhost-only Portaldot local dev transactions when `portaldot_dev --dev --alice` is running. Public testnet/mainnet broadcasting remains intentionally disabled until explicit approval, wallet/account scope, and chain target are confirmed.

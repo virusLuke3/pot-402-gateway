@@ -101,3 +101,23 @@ test('ledger endpoint redacts access tokens', async () => {
     assert.match(ledger.accessTokens[0].token, /^.{8}…redacted$/);
   });
 });
+
+test('local dev preview endpoint prepares localhost-only transfer proof', async () => {
+  await withServer(async (baseUrl) => {
+    const challengeResponse = await fetch(`${baseUrl}/api/protected/weather`).then((r) => r.json());
+    const previewResponse = await fetch(`${baseUrl}/api/receipts/local-dev/preview`, {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ challengeId: challengeResponse.challenge.id, payer: 'Alice' }),
+    });
+    assert.equal(previewResponse.status, 200);
+    const preview = await previewResponse.json();
+    assert.equal(preview.mode, 'local-dev-chain');
+    assert.equal(preview.rpcUrl, 'ws://127.0.0.1:9944');
+    assert.equal(preview.network.safety, 'local_only_no_mainnet_funds');
+    assert.equal(preview.payer.uri, '//Alice');
+    assert.equal(preview.extrinsic.call, 'transferKeepAlive');
+    assert.equal(preview.extrinsic.params.dest, challengeResponse.challenge.recipient);
+    assert.equal(preview.extrinsic.params.value, challengeResponse.challenge.amountPlanck);
+  });
+});

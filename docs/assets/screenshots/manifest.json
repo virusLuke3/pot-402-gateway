@@ -1,0 +1,38 @@
+{
+  "capturedAt": "2026-05-16T10:44:19.448Z",
+  "baseUrl": "http://127.0.0.1:4020",
+  "idea": "POT-402 pay-per-call APIs for Portaldot builders",
+  "scenario": "paid_ai_hackathon_report",
+  "mode": "local-dev-chain",
+  "receipt": {
+    "id": "local_0778a5e97189",
+    "type": "local-dev-portaldot-payment-receipt",
+    "mode": "local-dev-chain",
+    "payer": {
+      "alias": "Alice",
+      "address": "5GrwvaEF5zXb26Fz9rcQpDWS57CtERHpNehXCPcNoHGKutQY"
+    },
+    "recipient": "5E9oDs9PjpsBbxXxRE9uMaZZhnBAV38n2ouLB28oecBDdeQo",
+    "amountPOT": "0.0030",
+    "amountPlanck": "300000000000",
+    "txHash": "0x0778a5e97189254c6590ed2f995c650b4654e53085bd01c6f64076b23bd8136a",
+    "blockHash": "0x26990d90ea169dd15c43c240d67c60fb9f9ec911584af57de7d91da6a7cce274",
+    "feePlanck": "1460298901326",
+    "verification": {
+      "status": "verified_local_dev_chain",
+      "primitive": "balances.transferKeepAlive(dest, value)",
+      "rpcUrl": "ws://127.0.0.1:9944",
+      "note": "Verified on a Portaldot local development node using public Substrate dev accounts. No mainnet funds were used."
+    }
+  },
+  "downstreamVerification": "accepted_verified_local_dev_chain_receipt",
+  "unlockedReport": "POT-402 Verified Hackathon Report",
+  "files": [
+    "docs/assets/screenshots/01-home.png",
+    "docs/assets/screenshots/02-downstream-402-challenge.png",
+    "docs/assets/screenshots/03-local-dev-receipt-proof.png",
+    "docs/assets/screenshots/04-unlocked-ai-report.png",
+    "docs/assets/screenshots/05-receipt-panel-closeup.png"
+  ],
+  "safety": "Screenshots use localhost Portaldot local dev node only; no mainnet funds or private keys are used."
+}

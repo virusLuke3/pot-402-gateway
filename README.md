@@ -75,9 +75,106 @@ Open:
 http://localhost:4020
 ```
 
+## Recommended judge demo: downstream AI report
+
+The strongest demo path is the downstream `AI Hackathon Report API`. It proves that POT-402 Gateway is not just unlocking its own placeholder endpoint; a separate downstream consumer can require a real local-chain POT receipt before returning premium content.
+
+### What the judge sees
+
+1. The downstream API is called without payment and returns `HTTP 402 Payment Required`.
+2. The 402 response includes a `hackathon_report` payment challenge with a native `balances.transferKeepAlive(dest, value)` payment instruction.
+3. Alice pays `0.0030 POT` on the local Portaldot dev chain through `ws://127.0.0.1:9944`.
+4. The gateway stores a `verified_local_dev_chain` receipt with tx hash, block hash, payer, recipient, amount, and fee.
+5. The downstream verifier rejects mock receipts and accepts only `verified_local_dev_chain` receipts.
+6. The downstream service returns `POT-402 Verified Hackathon Report`.
+
+### Run the recommended demo
+
+Terminal 1 — start Portaldot local dev node:
+
+```bash
+# from the downloaded portaldot-testnet-macos or portaldot-testnet-ubuntu directory
+./portaldot_dev --dev --alice --tmp
+```
+
+Terminal 2 — start the gateway in local-dev mode:
+
+```bash
+npm install
+npm run dev:local
+```
+
+Open the UI:
+
+```text
+http://localhost:4020
+```
+
+Click:
+
+```text
+Run Downstream AI Report Demo
+```
+
+Expected proof labels:
+
+```text
+scenario: paid_ai_hackathon_report
+mode: local-dev-chain
+verification: verified_local_dev_chain
+downstreamVerification: accepted_verified_local_dev_chain_receipt
+unlockedReport: POT-402 Verified Hackathon Report
+```
+
+CLI equivalent:
+
+```bash
+curl -s -X POST http://localhost:4020/api/demo/downstream/hackathon-report/local-dev \
+  -H 'content-type: application/json' \
+  -d '{"idea":"POT-402 pay-per-call APIs for Portaldot builders","payer":"Alice"}'
+```
+
+### Capture presentation screenshots
+
+The repository includes a repeatable screenshot capture script for hackathon submissions. It drives the running local UI/API with Playwright, performs the downstream local-dev demo, and saves image assets under `docs/assets/screenshots/`.
+
+First-time setup:
+
+```bash
+npm run screenshots:install
+```
+
+Capture screenshots:
+
+```bash
+npm run screenshots
+```
+
+Generated assets:
+
+| Step | Screenshot | What it shows |
+|---|---|---|
+| 1 | [`01-home.png`](docs/assets/screenshots/01-home.png) | Landing page and available demo actions |
+| 2 | [`02-downstream-402-challenge.png`](docs/assets/screenshots/02-downstream-402-challenge.png) | Downstream API returning `HTTP 402` before payment |
+| 3 | [`03-local-dev-receipt-proof.png`](docs/assets/screenshots/03-local-dev-receipt-proof.png) | Local Portaldot receipt and downstream verification proof |
+| 4 | [`04-unlocked-ai-report.png`](docs/assets/screenshots/04-unlocked-ai-report.png) | The unlocked AI hackathon report |
+| 5 | [`05-receipt-panel-closeup.png`](docs/assets/screenshots/05-receipt-panel-closeup.png) | Close-up of tx hash, block hash, payer, amount, and verification status |
+
+### Screenshot gallery
+
+![POT-402 Gateway landing page](docs/assets/screenshots/01-home.png)
+
+![Downstream API returns HTTP 402 before payment](docs/assets/screenshots/02-downstream-402-challenge.png)
+
+![Verified local-dev receipt and downstream verification](docs/assets/screenshots/03-local-dev-receipt-proof.png)
+
+![Unlocked AI hackathon report](docs/assets/screenshots/04-unlocked-ai-report.png)
+
+![Receipt proof close-up](docs/assets/screenshots/05-receipt-panel-closeup.png)
+
 ## Local dev chain demo
 
-The stronger judge demo uses the official Portaldot local development network:
+The judge demo uses the official Portaldot local development network:
 
 ```bash
 # from the downloaded portaldot-testnet-macos or portaldot-testnet-ubuntu directory
@@ -135,7 +232,7 @@ This proves real Substrate/Portaldot transaction mechanics without mainnet funds
 | `/api/chain/config` | GET | Portaldot chain config and docs links |
 | `/api/chain/status` | GET | Read-only RPC status; never broadcasts tx |
 | `/api/products` | GET | Demo paid API products |
-| `/api/protected/weather` | GET | Protected API, returns 402 until access token is provided. Local demo supports `?accessToken=...`; public deployments should prefer `Authorization: Bearer ***` to avoid logging tokens in URLs. |
+| `/api/protected/weather` | GET | Protected API, returns 402 until access token is provided. Local demo supports `?accessToken=...`; public deployments should prefer an Authorization Bearer header to avoid logging tokens in URLs. |
 | `/api/protected/builder_alpha` | GET | Second protected product |
 | `/api/downstream/hackathon-report` | POST | Real downstream scenario: AI report API returns 402 until a verified local-dev receipt is provided |
 | `/api/receipts/simulate` | POST | Create safe mock receipt for a challenge |

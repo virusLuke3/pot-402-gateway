@@ -93,6 +93,52 @@ async function runFullLocalDevDemo() {
   $('unlock-api').disabled = !currentAccessToken;
 }
 
+async function runDownstreamReportDemo() {
+  const idea = 'POT-402 pay-per-call APIs for Portaldot builders';
+  $('challenge-output').textContent = 'Calling downstream AI Hackathon Report API without payment…';
+  $('receipt-output').textContent = 'Waiting for downstream POT-402 challenge…';
+  $('unlock-output').textContent = 'The downstream verifier will reject mock receipts and require verified_local_dev_chain.';
+
+  const unpaid = await fetch('/api/downstream/hackathon-report', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ idea, payer: 'Alice' }),
+  });
+  const unpaidBody = await unpaid.json();
+  $('challenge-output').textContent = `HTTP ${unpaid.status}\n\n${pretty(unpaidBody)}`;
+  if (!unpaidBody.challenge) {
+    $('receipt-output').textContent = 'Downstream service did not return a POT-402 challenge.';
+    return;
+  }
+
+  const res = await fetch('/api/demo/downstream/hackathon-report/local-dev', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({ idea, payer: 'Alice' }),
+  });
+  const body = await res.json();
+  if (!res.ok) {
+    $('receipt-output').textContent = `HTTP ${res.status}\n\n${pretty(body)}`;
+    $('unlock-output').textContent = 'Start the Portaldot local dev node and try the downstream demo again.';
+    return;
+  }
+
+  currentChallenge = body.upstream.challenge;
+  currentReceipt = body.upstream.receipt;
+  currentAccessToken = null;
+  $('receipt-output').textContent = `HTTP ${res.status}\n\n${pretty({
+    scenario: body.scenario,
+    mode: body.mode,
+    demoSteps: body.demoSteps,
+    upstreamReceipt: body.upstream.receipt,
+    downstreamVerification: body.downstream.verification,
+    safety: body.safety,
+  })}`;
+  $('unlock-output').textContent = pretty(body.downstream.report);
+  setReceiptButtons(Boolean(currentChallenge));
+  $('unlock-api').disabled = true;
+}
+
 async function unlockApi() {
   if (!currentAccessToken) return;
   const res = await fetch('/api/protected/weather?accessToken=' + encodeURIComponent(currentAccessToken));
@@ -112,5 +158,6 @@ $('simulate-payment').addEventListener('click', simulatePayment);
 $('preview-local-payment').addEventListener('click', previewLocalDevPayment);
 $('local-dev-payment').addEventListener('click', submitLocalDevPayment);
 $('run-local-demo').addEventListener('click', runFullLocalDevDemo);
+$('run-downstream-demo').addEventListener('click', runDownstreamReportDemo);
 $('unlock-api').addEventListener('click', unlockApi);
 $('chain-status').addEventListener('click', checkChainStatus);

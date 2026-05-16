@@ -8,6 +8,7 @@ Commands expected to pass:
 git diff --check
 npm test
 npm run smoke
+npm run smoke:downstream
 ```
 
 Current API proof points:
@@ -17,6 +18,9 @@ Current API proof points:
 - `/api/receipts/local-dev/preview` prepares a localhost-only `balances.transferKeepAlive` proof.
 - `/api/receipts/local-dev` submits a transfer to `ws://127.0.0.1:9944` when a Portaldot local dev node is running.
 - `/api/demo/local-dev` runs the full local dev challenge → transfer → unlock proof in one call for demo reliability.
+- `/api/downstream/hackathon-report` is a downstream AI report consumer that returns `402` until a verified receipt is provided.
+- `/api/demo/downstream/hackathon-report/local-dev` proves the downstream path end-to-end: local POT payment → receipt verification → AI report unlock.
+- The downstream verifier rejects `verified_mock` receipts and requires `verified_local_dev_chain`.
 - `/api/protected/weather?accessToken=...` returns a paid payload.
 - `/api/ledger` redacts access tokens.
 - `/api/chain/status` performs read-only Portaldot RPC checks.

@@ -7,6 +7,11 @@ const { chainConfig, getChainStatus } = require('./chain');
 const { createChallenge, getProduct, premiumPayload, simulateReceipt, verifyAccess } = require('./payment');
 const { buildLocalDevPaymentPreview, executeLocalDevPayment } = require('./local-dev-payment');
 const { runLocalDevDemo } = require('./demo-flow');
+const {
+  createDownstreamPaymentChallenge,
+  runDownstreamHackathonReport,
+  runDownstreamLocalDevDemo,
+} = require('./downstream-demo');
 
 const PUBLIC_DIR = path.join(__dirname, '..', 'public');
 
@@ -97,7 +102,7 @@ async function route(req, res, deps = {}) {
   }
 
   if (req.method === 'GET' && pathname === '/api/products') {
-    sendJson(res, 200, { products: [getProduct('weather'), getProduct('builder_alpha')] });
+    sendJson(res, 200, { products: [getProduct('weather'), getProduct('builder_alpha'), getProduct('hackathon_report')] });
     return;
   }
 
@@ -155,6 +160,43 @@ async function route(req, res, deps = {}) {
     return;
   }
 
+  if (req.method === 'POST' && pathname === '/api/downstream/hackathon-report') {
+    const body = await parseBody(req);
+    const bearerToken = req.headers.authorization?.replace(/^Bearer\s+/i, '');
+    const result = runDownstreamHackathonReport(
+      { idea: body.idea, accessToken: body.accessToken || bearerToken },
+      config.ledgerPath,
+    );
+    if (result.ok) {
+      sendJson(res, 200, result);
+      return;
+    }
+    if (result.statusCode === 402) {
+      sendJson(res, 402, createDownstreamPaymentChallenge(
+        { idea: body.idea, payer: body.payer || 'anonymous' },
+        config.ledgerPath,
+      ));
+      return;
+    }
+    sendJson(res, result.statusCode || 403, {
+      error: result.error || 'downstream_verification_failed',
+      message: 'The downstream AI report verifier requires a verified local-dev Portaldot receipt before unlocking the report.',
+      verification: result,
+    });
+    return;
+  }
+
+  if (req.method === 'POST' && pathname === '/api/demo/downstream/hackathon-report/local-dev') {
+    const body = await parseBody(req);
+    const result = await runDownstreamLocalDevDemo(
+      { idea: body.idea, payer: body.payer || 'Alice' },
+      config.ledgerPath,
+      deps.localDevClientFactory,
+    );
+    sendJson(res, 201, result);
+    return;
+  }
+
   if (req.method === 'GET' && pathname === '/api/ledger') {
     const ledger = readLedger(config.ledgerPath);
     sendJson(res, 200, {
@@ -174,7 +216,7 @@ async function route(req, res, deps = {}) {
     return;
   }
 
-  const protectedMatch = pathname.match(/^\/api\/protected\/(weather|builder_alpha)$/);
+  const protectedMatch = pathname.match(/^\/api\/protected\/(weather|builder_alpha|hackathon_report)$/);
   if (req.method === 'GET' && protectedMatch) {
     const productId = protectedMatch[1];
     const token = url.searchParams.get('accessToken') || req.headers.authorization?.replace(/^Bearer\s+/i, '');

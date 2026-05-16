@@ -14,6 +14,7 @@
     "test": "node --test test/*.test.js",
     "smoke": "node scripts/smoke.js",
     "smoke:local-dev": "node scripts/local-dev-smoke.js",
+    "smoke:downstream": "node scripts/downstream-local-dev-smoke.js",
     "ci": "npm run verify",
     "verify": "npm test && npm run smoke"
   },

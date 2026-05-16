@@ -10,10 +10,11 @@ Portaldot builders need a simple primitive for monetizing APIs, data feeds, tool
 
 POT-402 Gateway demonstrates a small but reusable pattern:
 
-1. A protected API returns `402 Payment Required`.
+1. A protected or downstream API returns `402 Payment Required`.
 2. The response includes a Portaldot/POT payment challenge.
 3. The user pays POT on a local Portaldot dev node or, in safe mock mode, simulates a receipt.
 4. The gateway verifies the receipt and unlocks the API response.
+5. A downstream service can independently require `verified_local_dev_chain` before returning premium content, proving the gateway is reusable beyond the built-in demo.
 
 ## Hackathon fit
 
@@ -65,6 +66,7 @@ For local-dev mode after the node is running:
 ```bash
 npm run dev:local
 npm run smoke:local-dev
+npm run smoke:downstream
 ```
 
 Open:
@@ -94,6 +96,14 @@ Local-dev flow:
 
 1. Click **Run Full Local Dev Demo**.
 2. Show the generated 402 challenge, localhost-only transfer preview, verified local receipt, and unlocked premium API payload.
+
+**Downstream verification demo path:**
+
+1. Click **Run Downstream AI Report Demo**.
+2. Show the downstream `AI Hackathon Report API` returning a POT-402 challenge before payment.
+3. Show Alice paying `0.0030 POT` on the local Portaldot dev chain through `balances.transferKeepAlive`.
+4. Show the downstream verifier accepting only `verified_local_dev_chain` receipts and rejecting mock receipts.
+5. Show the unlocked `POT-402 Verified Hackathon Report`.
 
 **Step-by-step demo path:**
 
@@ -125,12 +135,14 @@ This proves real Substrate/Portaldot transaction mechanics without mainnet funds
 | `/api/chain/config` | GET | Portaldot chain config and docs links |
 | `/api/chain/status` | GET | Read-only RPC status; never broadcasts tx |
 | `/api/products` | GET | Demo paid API products |
-| `/api/protected/weather` | GET | Protected API, returns 402 until access token is provided. Local demo supports `?accessToken=...`; public deployments should prefer `Authorization: Bearer <token>` to avoid logging tokens in URLs. |
+| `/api/protected/weather` | GET | Protected API, returns 402 until access token is provided. Local demo supports `?accessToken=...`; public deployments should prefer `Authorization: Bearer ***` to avoid logging tokens in URLs. |
 | `/api/protected/builder_alpha` | GET | Second protected product |
+| `/api/downstream/hackathon-report` | POST | Real downstream scenario: AI report API returns 402 until a verified local-dev receipt is provided |
 | `/api/receipts/simulate` | POST | Create safe mock receipt for a challenge |
 | `/api/receipts/local-dev/preview` | POST | Preview localhost-only `balances.transferKeepAlive` payment for a challenge |
 | `/api/receipts/local-dev` | POST | Submit localhost-only local dev transfer and create verified local receipt |
 | `/api/demo/local-dev` | POST | Run the full one-click local dev challenge → transfer → unlock demo |
+| `/api/demo/downstream/hackathon-report/local-dev` | POST | One-click downstream AI report demo: pay with local POT, verify receipt, unlock report |
 | `/api/ledger` | GET | Local receipt/access ledger |
 
 ## Architecture

@@ -9,6 +9,7 @@ This document is the judge-facing proof path for running POT-402 Gateway without
 - A real transaction can be submitted to a Portaldot local development node.
 - The gateway records the tx hash, block hash, events, amount, payer, recipient, and verification status.
 - The verified receipt unlocks the protected API response.
+- A downstream API can independently reject mock receipts and require `verified_local_dev_chain` before returning premium content.
 
 ## Safety model
 
@@ -70,6 +71,18 @@ http://localhost:4020
    - amount
 4. Confirm the unlock panel shows the paid API response.
 
+### Downstream AI report path
+
+1. Click **Run Downstream AI Report Demo**.
+2. Confirm the challenge panel shows `scenario: downstream_hackathon_report` and product `hackathon_report`.
+3. Confirm the receipt panel shows:
+   - `scenario: paid_ai_hackathon_report`
+   - `verification.status: verified_local_dev_chain`
+   - `downstreamVerification.status: accepted_verified_local_dev_chain_receipt`
+   - amount `0.0030 POT`
+4. Confirm the unlock panel shows `POT-402 Verified Hackathon Report`.
+5. Explain that mock receipts are rejected by this downstream verifier.
+
 ### Step-by-step path
 
 1. Click **Call Protected API**.
@@ -121,6 +134,14 @@ curl -s -X POST http://localhost:4020/api/demo/local-dev \
   -d '{"productId":"weather","payer":"Alice"}'
 ```
 
+One-click downstream demo:
+
+```bash
+curl -s -X POST http://localhost:4020/api/demo/downstream/hackathon-report/local-dev \
+  -H 'content-type: application/json' \
+  -d '{"idea":"POT-402 pay-per-call APIs for Portaldot builders","payer":"Alice"}'
+```
+
 Submit local transfer:
 
 ```bash
@@ -133,7 +154,7 @@ Unlock protected API:
 
 ```bash
 curl -s http://localhost:4020/api/protected/weather \
-  -H 'Authorization: Bearer <access-token>'
+  -H 'Authorization: Bearer ***'
 ```
 
 ## Current host note

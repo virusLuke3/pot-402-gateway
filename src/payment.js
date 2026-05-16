@@ -32,8 +32,42 @@ function getProduct(productId = 'weather') {
       amountPOT: '0.0020',
       amountPlanck: String(2n * 10n ** 11n),
     },
+    hackathon_report: {
+      id: 'hackathon_report',
+      name: 'Paid AI Hackathon Report API',
+      endpoint: '/api/downstream/hackathon-report',
+      description: 'Downstream demo API that unlocks an AI-style hackathon report only after a verified local-dev POT-402 receipt.',
+      amountPOT: '0.0030',
+      amountPlanck: String(3n * 10n ** 11n),
+    },
   };
   return products[productId] || products.weather;
+}
+
+function getChallengeNetwork() {
+  if (config.mode === 'local-dev') {
+    return {
+      name: 'Portaldot Local Development Network',
+      rpcUrl: config.localRpcUrl,
+      ss58Format: config.ss58Format,
+      nativeToken: config.token,
+      safety: 'localhost_only_no_mainnet_funds',
+    };
+  }
+  return {
+    name: 'Portaldot Mainnet (reference only)',
+    rpcUrl: config.rpcUrl,
+    ss58Format: config.ss58Format,
+    nativeToken: config.token,
+    safety: 'read_only_reference_no_broadcast',
+  };
+}
+
+function getChallengeSafetyNote() {
+  if (config.mode === 'local-dev') {
+    return 'Local-dev mode submits only to localhost RPC with public Substrate dev accounts. No mainnet funds are used.';
+  }
+  return 'Mock receipts are safe for local demos. Real Portaldot transactions require explicit user confirmation.';
 }
 
 function createChallenge({ productId = 'weather', payer = 'demo-user' } = {}, ledgerPath = config.ledgerPath) {
@@ -51,12 +85,7 @@ function createChallenge({ productId = 'weather', payer = 'demo-user' } = {}, le
     amountPlanck: product.amountPlanck,
     token: config.token,
     decimals: config.decimals,
-    network: {
-      name: 'Portaldot Mainnet',
-      rpcUrl: config.rpcUrl,
-      ss58Format: config.ss58Format,
-      nativeToken: config.token,
-    },
+    network: getChallengeNetwork(),
     suggestedExtrinsic: {
       pallet: 'Balances',
       call: 'transferKeepAlive',
@@ -71,7 +100,7 @@ function createChallenge({ productId = 'weather', payer = 'demo-user' } = {}, le
     status: 'pending',
     safety: {
       mode: config.mode,
-      note: 'Mock receipts are safe for local demos. Real Portaldot transactions require explicit user confirmation.',
+      note: getChallengeSafetyNote(),
     },
   };
   const ledger = readLedger(ledgerPath);
@@ -159,6 +188,15 @@ function premiumPayload(productId) {
       unlocked: true,
       insight: 'Portaldot builders are rewarded for native Substrate-first UX, clear demos, and POT-visible proofs.',
       opportunities: ['payment flows', 'builder tooling', 'onchain identity', 'AI-assisted execution'],
+      generatedAt: nowIso(),
+    };
+  }
+  if (productId === 'hackathon_report') {
+    return {
+      product: 'Paid AI Hackathon Report API',
+      unlocked: true,
+      reportType: 'sponsor-fit-and-mvp-plan',
+      message: 'This downstream AI-style report is unlocked only after a POT-402 receipt is verified.',
       generatedAt: nowIso(),
     };
   }
